@@ -20,8 +20,8 @@ type Props = {
   orgId: string | null;
   searchTerm: string;
   isLastItem: boolean;
-  relativeTime?: string;
-  displayRelativeTime?: boolean;
+  relativeTime: string;
+  displayRelativeTime: boolean;
 };
 
 const ListBody = React.memo(

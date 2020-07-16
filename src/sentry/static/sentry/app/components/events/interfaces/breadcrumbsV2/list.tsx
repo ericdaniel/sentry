@@ -20,8 +20,8 @@ const COLUMN_QUANTITY = 5;
 type Props = {
   onSwitchTimeFormat: () => void;
   breadcrumbs: BreadcrumbsWithDetails;
-  relativeTime?: string;
-} & Omit<React.ComponentProps<typeof ListBody>, 'relativeTime'>;
+  relativeTime: string;
+} & Omit<React.ComponentProps<typeof ListBody>, 'breadcrumb' | 'isLastItem' | 'column'>;
 
 type State = {
   columnsWidth: Array<number>;
@@ -79,7 +79,14 @@ class List extends React.Component<Props, State> {
   }
 
   renderBody = (columnIndex: number, breadcrumb: BreadcrumbsWithDetails[0]) => {
-    const {event, orgId, searchTerm, breadcrumbs} = this.props;
+    const {
+      event,
+      orgId,
+      searchTerm,
+      breadcrumbs,
+      relativeTime,
+      displayRelativeTime,
+    } = this.props;
     return (
       <ListBody
         key={`body-column-${breadcrumb.id}-${columnIndex}`}
@@ -88,6 +95,8 @@ class List extends React.Component<Props, State> {
         breadcrumb={breadcrumb}
         column={columnIndex}
         event={event}
+        relativeTime={relativeTime}
+        displayRelativeTime={displayRelativeTime}
         isLastItem={breadcrumbs[breadcrumbs.length - 1].id === breadcrumb.id}
       />
     );
@@ -154,7 +163,7 @@ class List extends React.Component<Props, State> {
               rowHeight={cache.rowHeight}
               // +1 is needed for the header
               rowCount={breadcrumbs.length + 1}
-              overscanColumnCount={5}
+              overscanColumnCount={3}
               columnCount={COLUMN_QUANTITY}
               // the fixed row is the header
               fixedRowCount={1}

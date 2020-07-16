@@ -38,8 +38,6 @@ const GridCell = styled('div')<{
   position: relative;
   border-bottom: 1px solid ${p => p.theme.borderLight};
   margin-bottom: -1px;
-  text-overflow: ellipsis;
-  overflow: hidden;
   padding: ${space(1)} ${space(2)};
   ${p =>
     p.hasError &&

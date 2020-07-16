@@ -419,7 +419,7 @@ class Breadcrumbs extends React.Component<Props, State> {
             onSwitchTimeFormat={this.handleSwitchTimeFormat}
             displayRelativeTime={displayRelativeTime}
             searchTerm={searchTerm}
-            relativeTime={relativeTime}
+            relativeTime={relativeTime!} // relativeTime has to be always avaible, as the last item timestamp is the event created time
           />
         ) : (
           <StyledEmptyMessage
