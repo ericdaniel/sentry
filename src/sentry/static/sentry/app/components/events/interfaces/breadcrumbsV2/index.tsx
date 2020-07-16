@@ -21,7 +21,7 @@ import {
   BreadcrumbLevelType,
 } from './types';
 import transformCrumbs from './transformCrumbs';
-import Filter from './filter/filter';
+import Filter from './filter';
 import List from './list';
 import Level from './level';
 import Icon from './icon';
@@ -49,6 +49,7 @@ type State = {
   filteredBySearch: BreadcrumbsWithDetails;
   filterOptions: FilterOptions;
   displayRelativeTime: boolean;
+  relativeTime?: string;
 };
 
 class Breadcrumbs extends React.Component<Props, State> {
@@ -116,6 +117,7 @@ class Breadcrumbs extends React.Component<Props, State> {
       filteredByFilter: tranformedCrumbs,
       filteredBySearch: this.getCollapsedBreadcrumbs(tranformedCrumbs),
       filterOptions,
+      relativeTime: tranformedCrumbs[tranformedCrumbs.length - 1]?.timestamp,
     });
   }
 
@@ -381,7 +383,13 @@ class Breadcrumbs extends React.Component<Props, State> {
 
   render() {
     const {type, event, orgId} = this.props;
-    const {filterOptions, searchTerm, filteredBySearch, displayRelativeTime} = this.state;
+    const {
+      filterOptions,
+      searchTerm,
+      filteredBySearch,
+      displayRelativeTime,
+      relativeTime,
+    } = this.state;
 
     return (
       <StyledEventDataSection
@@ -406,12 +414,12 @@ class Breadcrumbs extends React.Component<Props, State> {
         {filteredBySearch.length > 0 ? (
           <List
             breadcrumbs={filteredBySearch}
-            ref={this.listRef}
             event={event}
             orgId={orgId}
             onSwitchTimeFormat={this.handleSwitchTimeFormat}
             displayRelativeTime={displayRelativeTime}
             searchTerm={searchTerm}
+            relativeTime={relativeTime}
           />
         ) : (
           <StyledEmptyMessage

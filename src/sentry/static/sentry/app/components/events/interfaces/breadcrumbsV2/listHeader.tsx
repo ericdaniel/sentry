@@ -16,50 +16,40 @@ const getTimeTooltipTitle = (displayRelativeTime: boolean) => {
 };
 
 type Props = {
+  column: number;
   onSwitchTimeFormat: () => void;
   displayRelativeTime: boolean;
 };
 
-const ListHeader = React.memo(({onSwitchTimeFormat, displayRelativeTime}: Props) => {
-  // <React.Fragment>
-  //   <StyledGridCell>{t('Type')}</StyledGridCell>
-  //   <Category>{t('Category')}</Category>
-  //   <StyledGridCell>{t('Description')}</StyledGridCell>
-  //   <StyledGridCell>{t('Level')}</StyledGridCell>
-  // <Time onClick={onSwitchTimeFormat}>
-  //   <Tooltip title={getTimeTooltipTitle(displayRelativeTime)}>
-  //     <StyledIconSwitch size="xs" />
-  //   </Tooltip>
-  //   <span> {t('Time')}</span>
-  // </Time>
-  // </React.Fragment>
-  switch (columnIndex) {
-    case 0:
-      return <StyledGridCell>{t('Type')}</StyledGridCell>;
-    case 1:
-      return <Category>{t('Category')}</Category>;
-    case 2:
-      return <StyledGridCell>{t('Description')}</StyledGridCell>;
-    case 3:
-      return <StyledGridCell>{t('Level')}</StyledGridCell>;
-    case 4:
-      return (
-        <Time onClick={onSwitchTimeFormat}>
-          <Tooltip title={getTimeTooltipTitle(displayRelativeTime)}>
-            <StyledIconSwitch size="xs" />
-          </Tooltip>
-          <span> {t('Time')}</span>
-        </Time>
-      );
-    default:
-      return null;
+const ListHeader = React.memo(
+  ({column, onSwitchTimeFormat, displayRelativeTime}: Props) => {
+    switch (column) {
+      case 0:
+        return <StyledGridCell>{t('Type')}</StyledGridCell>;
+      case 1:
+        return <Category>{t('Category')}</Category>;
+      case 2:
+        return <StyledGridCell>{t('Description')}</StyledGridCell>;
+      case 3:
+        return <StyledGridCell>{t('Level')}</StyledGridCell>;
+      case 4:
+        return (
+          <Time onClick={onSwitchTimeFormat}>
+            <Tooltip title={getTimeTooltipTitle(displayRelativeTime)}>
+              <StyledIconSwitch size="xs" />
+            </Tooltip>
+            <span> {t('Time')}</span>
+          </Time>
+        );
+      default:
+        return null;
+    }
   }
-});
+);
 
 export default ListHeader;
 
 const StyledGridCell = styled(GridCell)`
-  position: sticky;
   z-index: ${p => p.theme.zIndex.breadcrumbs.header};
   top: 0;
   border-bottom: 1px solid ${p => p.theme.borderDark};
@@ -68,12 +58,8 @@ const StyledGridCell = styled(GridCell)`
   font-weight: 600;
   text-transform: uppercase;
   line-height: 1;
-  font-size: ${p => p.theme.fontSizeExtraSmall};
-
-  @media (min-width: ${p => p.theme.breakpoints[0]}) {
-    padding: ${space(2)} ${space(2)};
-    font-size: ${p => p.theme.fontSizeSmall};
-  }
+  padding: ${space(2)};
+  font-size: ${p => p.theme.fontSizeSmall};
 `;
 
 const Category = styled(StyledGridCell)`
