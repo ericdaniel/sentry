@@ -7,6 +7,7 @@ import {
   CellMeasurer,
   CellMeasurerCache,
 } from 'react-virtualized';
+import isEqual from 'lodash/isEqual';
 
 import space from 'app/styles/space';
 
@@ -42,8 +43,19 @@ class List extends React.Component<Props, State> {
     this.loadState();
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (!isEqual(prevProps.breadcrumbs, this.props.breadcrumbs)) {
+      this.updateGrid();
+    }
+  }
+
   listBodyRef = React.createRef<HTMLDivElement>();
   multiGridRef: MultiGrid | null = null;
+
+  updateGrid() {
+    cache.clearAll();
+    this.multiGridRef?.forceUpdate();
+  }
 
   loadState() {
     const listBodyElement = this.listBodyRef.current;
@@ -67,6 +79,10 @@ class List extends React.Component<Props, State> {
     for (let index = 0; index < firstFiveChildren.length; index++) {
       if (index === firstFiveChildren.length - 1) {
         columnsWidth.push(firstFiveChildren[index].offsetWidth + 2);
+        continue;
+      }
+      if (index === firstFiveChildren.length - 2) {
+        columnsWidth.push(firstFiveChildren[index].offsetWidth + 1);
         continue;
       }
       columnsWidth.push(firstFiveChildren[index].offsetWidth);
@@ -185,6 +201,9 @@ const Wrapper = styled('div')`
   > *:nth-last-child(5):before {
     bottom: calc(100% - ${space(1)});
   }
-  grid-template-columns: max-content minmax(132px, 1fr) 6fr max-content max-content;
+  grid-template-columns: max-content minmax(55px, 1fr) 6fr max-content 65px;
+  @media (min-width: ${p => p.theme.breakpoints[0]}) {
+    grid-template-columns: max-content minmax(132px, 1fr) 6fr max-content max-content;
+  }
   ${aroundContentStyle}
 `;

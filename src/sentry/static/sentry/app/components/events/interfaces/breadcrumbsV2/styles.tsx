@@ -38,7 +38,12 @@ const GridCell = styled('div')<{
   position: relative;
   border-bottom: 1px solid ${p => p.theme.borderLight};
   margin-bottom: -1px;
-  padding: ${space(1)} ${space(2)};
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: ${space(1)};
+  @media (min-width: ${p => p.theme.breakpoints[0]}) {
+    padding: ${space(1)} ${space(2)};
+  }
   ${p =>
     p.hasError &&
     `
@@ -53,15 +58,19 @@ const GridCell = styled('div')<{
 const GridCellLeft = styled(GridCell)`
   align-items: center;
   line-height: 1;
+  padding: ${space(1)} ${space(0.5)} ${space(1)} ${space(1)};
   :before {
     content: '';
     display: block;
     width: 1px;
     top: 0;
     bottom: 0;
-    left: 29px;
+    left: 21px;
     background: ${p => (p.hasError ? '#fa4747' : p.theme.gray300)};
     position: absolute;
+    @media (min-width: ${p => p.theme.breakpoints[0]}) {
+      left: 29px;
+    }
   }
 `;
 

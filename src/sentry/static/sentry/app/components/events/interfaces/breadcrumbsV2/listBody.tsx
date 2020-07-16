@@ -94,5 +94,7 @@ const ListBody = React.memo(
 export default ListBody;
 
 const GridCellCategory = styled(GridCell)`
-  padding-left: ${space(1)};
+  @media (min-width: ${p => p.theme.breakpoints[0]}) {
+    padding-left: ${space(1)};
+  }
 `;

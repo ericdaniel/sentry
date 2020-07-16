@@ -59,7 +59,11 @@ const StyledGridCell = styled(GridCell)`
   text-transform: uppercase;
   line-height: 1;
   padding: ${space(2)};
-  font-size: ${p => p.theme.fontSizeSmall};
+  font-size: ${p => p.theme.fontSizeExtraSmall};
+  @media (min-width: ${p => p.theme.breakpoints[0]}) {
+    padding: ${space(2)} ${space(2)};
+    font-size: ${p => p.theme.fontSizeSmall};
+  }
 `;
 
 const Category = styled(StyledGridCell)`
