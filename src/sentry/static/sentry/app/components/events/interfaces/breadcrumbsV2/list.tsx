@@ -43,19 +43,12 @@ class ListContainer extends React.Component<Props, State> {
     this.loadState();
   }
 
-  componentWillReceiveProps(prevProps: Props) {
-    if (
-      !isEqual(prevProps.breadcrumbs, this.props.breadcrumbs) ||
-      prevProps.displayRelativeTime !== this.props.displayRelativeTime
-    ) {
-      this.updateGrid();
-    }
+  componentWillReceiveProps() {
+    this.updateGrid();
   }
 
-  componentDidUpdate(prevProps: Props) {
-    if (!isEqual(prevProps.breadcrumbs, this.props.breadcrumbs)) {
-      this.updateGrid();
-    }
+  componentDidUpdate() {
+    this.updateGrid();
   }
 
   listBodyRef = React.createRef<HTMLDivElement>();
@@ -148,16 +141,6 @@ class ListContainer extends React.Component<Props, State> {
     );
   };
 
-  getListHeight() {
-    const {listBodyHeight} = this.state;
-
-    if (!listBodyHeight || listBodyHeight > LIST_MAX_HEIGHT) {
-      return LIST_MAX_HEIGHT;
-    }
-
-    return listBodyHeight;
-  }
-
   render() {
     const {breadcrumbs, displayRelativeTime, onSwitchTimeFormat} = this.props;
     const {listBodyHeight} = this.state;
@@ -191,8 +174,8 @@ class ListContainer extends React.Component<Props, State> {
                 this.listRef = el;
               }}
               deferredMeasurementCache={cache}
-              height={this.getListHeight()}
-              overscanRowCount={3}
+              height={LIST_MAX_HEIGHT}
+              overscanRowCount={5}
               rowCount={breadcrumbs.length}
               rowHeight={cache.rowHeight}
               rowRenderer={this.renderRow}
@@ -225,4 +208,5 @@ const Wrapper = styled('div')`
 const StyledList = styled(List)<{height: number}>`
   height: auto !important;
   max-height: ${p => p.height}px;
+  overflow: auto !important;
 `;
