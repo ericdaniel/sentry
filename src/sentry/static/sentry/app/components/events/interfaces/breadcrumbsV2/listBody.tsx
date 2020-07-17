@@ -37,6 +37,8 @@ const ListBody = React.memo(
   }: Props) => {
     const hasError = breadcrumb.type === BreadcrumbType.ERROR;
 
+    console.log('displayRelativeTime', displayRelativeTime);
+
     switch (column) {
       case 0: {
         return (

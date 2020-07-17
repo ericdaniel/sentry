@@ -16,36 +16,24 @@ const getTimeTooltipTitle = (displayRelativeTime: boolean) => {
 };
 
 type Props = {
-  column: number;
   onSwitchTimeFormat: () => void;
   displayRelativeTime: boolean;
 };
 
-const ListHeader = React.memo(
-  ({column, onSwitchTimeFormat, displayRelativeTime}: Props) => {
-    switch (column) {
-      case 0:
-        return <StyledGridCell>{t('Type')}</StyledGridCell>;
-      case 1:
-        return <Category>{t('Category')}</Category>;
-      case 2:
-        return <StyledGridCell>{t('Description')}</StyledGridCell>;
-      case 3:
-        return <StyledGridCell>{t('Level')}</StyledGridCell>;
-      case 4:
-        return (
-          <Time onClick={onSwitchTimeFormat}>
-            <Tooltip title={getTimeTooltipTitle(displayRelativeTime)}>
-              <StyledIconSwitch size="xs" />
-            </Tooltip>
-            <span> {t('Time')}</span>
-          </Time>
-        );
-      default:
-        return null;
-    }
-  }
-);
+const ListHeader = React.memo(({onSwitchTimeFormat, displayRelativeTime}: Props) => (
+  <React.Fragment>
+    <StyledGridCell>{t('Type')}</StyledGridCell>
+    <Category>{t('Category')}</Category>
+    <StyledGridCell>{t('Description')}</StyledGridCell>
+    <StyledGridCell>{t('Level')}</StyledGridCell>
+    <Time onClick={onSwitchTimeFormat}>
+      <Tooltip title={getTimeTooltipTitle(displayRelativeTime)}>
+        <StyledIconSwitch size="xs" />
+      </Tooltip>
+      <span> {t('Time')}</span>
+    </Time>
+  </React.Fragment>
+));
 
 export default ListHeader;
 

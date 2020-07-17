@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import {
-  MultiGrid,
-  GridCellProps,
+  List,
+  ListRowProps,
   AutoSizer,
   CellMeasurer,
   CellMeasurerCache,
@@ -18,7 +18,6 @@ import {BreadcrumbsWithDetails} from './types';
 
 const COLUMN_QUANTITY = 5;
 const MULTIGRID_MAX_HEIGHT = 500;
-const MULTIGRID_MIN_HEIGHT = 84;
 
 type Props = {
   onSwitchTimeFormat: () => void;
@@ -36,7 +35,7 @@ const cache = new CellMeasurerCache({
   minHeight: 42,
 });
 
-class List extends React.Component<Props, State> {
+class ListContainer extends React.Component<Props, State> {
   state: State = {
     columnsWidth: [],
   };
@@ -45,23 +44,28 @@ class List extends React.Component<Props, State> {
     this.loadState();
   }
 
-  componentWillReceiveProps(nextProps: Props) {
-    if (!isEqual(nextProps.breadcrumbs, this.props.breadcrumbs)) {
-      this.setState({
-        listBodyHeight: undefined,
-      });
+  componentWillReceiveProps(prevProps: Props) {
+    if (
+      !isEqual(prevProps.breadcrumbs, this.props.breadcrumbs) ||
+      prevProps.displayRelativeTime !== this.props.displayRelativeTime
+    ) {
+      this.updateGrid();
     }
   }
 
   componentDidUpdate(prevProps: Props) {
     if (!isEqual(prevProps.breadcrumbs, this.props.breadcrumbs)) {
-      cache.clearAll();
-      this.multiGridRef?.recomputeGridSize();
+      this.updateGrid();
     }
   }
 
   listBodyRef = React.createRef<HTMLDivElement>();
-  multiGridRef: MultiGrid | null = null;
+  listRef: List | null = null;
+
+  updateGrid() {
+    cache.clearAll();
+    this.listRef?.forceUpdateGrid();
+  }
 
   loadState() {
     const listBodyElement = this.listBodyRef.current;
@@ -124,48 +128,47 @@ class List extends React.Component<Props, State> {
     );
   };
 
-  renderHeader = (columnIndex: number) => {
-    const {displayRelativeTime, onSwitchTimeFormat} = this.props;
-    return (
-      <ListHeader
-        key={`header-column-0-${columnIndex}`}
-        column={columnIndex}
-        displayRelativeTime={!!displayRelativeTime}
-        onSwitchTimeFormat={onSwitchTimeFormat}
-      />
-    );
-  };
-
-  renderCell = ({key, parent, rowIndex, columnIndex, style}: GridCellProps) => {
+  renderRow = ({index, key, parent, style}: ListRowProps) => {
+    const {columnsWidth} = this.state;
     return (
       <CellMeasurer
         cache={cache}
-        columnIndex={columnIndex}
+        columnIndex={0}
         key={key}
         parent={parent}
-        rowIndex={rowIndex}
+        rowIndex={index}
       >
-        <div style={style}>
-          {rowIndex === 0
-            ? this.renderHeader(columnIndex)
-            : this.renderBody(columnIndex, this.props.breadcrumbs[rowIndex - 1])}
+        <div
+          style={{
+            ...style,
+            display: 'grid',
+            gridTemplateColumns: `${columnsWidth[0]}px ${columnsWidth[1]}px ${columnsWidth[2]}px ${columnsWidth[3]}px ${columnsWidth[4]}px`,
+          }}
+        >
+          {[...Array(COLUMN_QUANTITY).keys()].map(column =>
+            this.renderBody(column, this.props.breadcrumbs[index])
+          )}
         </div>
       </CellMeasurer>
     );
   };
 
   render() {
-    const {breadcrumbs} = this.props;
-    const {listBodyHeight, columnsWidth} = this.state;
+    const {breadcrumbs, displayRelativeTime, onSwitchTimeFormat} = this.props;
+    const {listBodyHeight} = this.state;
 
     if (!listBodyHeight) {
-      const crumbColumns = [...Array(COLUMN_QUANTITY).keys()];
       return (
         <Wrapper ref={this.listBodyRef}>
-          {crumbColumns.map(this.renderHeader)}
+          <ListHeader
+            displayRelativeTime={!!displayRelativeTime}
+            onSwitchTimeFormat={onSwitchTimeFormat}
+          />
           {breadcrumbs.map(breadcrumb => (
             <React.Fragment key={breadcrumb.id}>
-              {crumbColumns.map(column => this.renderBody(column, breadcrumb))}
+              {[...Array(COLUMN_QUANTITY).keys()].map(column =>
+                this.renderBody(column, breadcrumb)
+              )}
             </React.Fragment>
           ))}
         </Wrapper>
@@ -174,25 +177,23 @@ class List extends React.Component<Props, State> {
 
     return (
       <Wrapper>
+        <ListHeader
+          displayRelativeTime={!!displayRelativeTime}
+          onSwitchTimeFormat={onSwitchTimeFormat}
+        />
         <AutoSizer disableHeight>
           {({width}) => (
-            <MultiGrid
-              ref={el => {
-                this.multiGridRef = el;
+            <StyledList
+              ref={(el: List | null) => {
+                this.listRef = el;
               }}
-              width={width}
-              height={MULTIGRID_MAX_HEIGHT}
-              // the columnsWidth is fetched in the first render
-              columnWidth={({index}) => columnsWidth[index]}
+              deferredMeasurementCache={cache}
+              height={listBodyHeight}
+              overscanRowCount={3}
+              rowCount={breadcrumbs.length}
               rowHeight={cache.rowHeight}
-              // +1 is needed for the header
-              rowCount={breadcrumbs.length + 1}
-              overscanColumnCount={3}
-              columnCount={COLUMN_QUANTITY}
-              // the fixed row is the header
-              fixedRowCount={1}
-              cellRenderer={this.renderCell}
-              isScrolling={false}
+              rowRenderer={this.renderRow}
+              width={width}
             />
           )}
         </AutoSizer>
@@ -201,7 +202,7 @@ class List extends React.Component<Props, State> {
   }
 }
 
-export default List;
+export default ListContainer;
 
 const Wrapper = styled('div')`
   max-height: ${MULTIGRID_MAX_HEIGHT}px;
@@ -216,4 +217,9 @@ const Wrapper = styled('div')`
   }
 
   ${aroundContentStyle}
+`;
+
+const StyledList = styled(List)<{height: number}>`
+  height: auto !important;
+  max-height: ${p => p.height}px;
 `;
