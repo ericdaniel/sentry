@@ -7,7 +7,7 @@ import {
   CellMeasurer,
   CellMeasurerCache,
 } from 'react-virtualized';
-import isEqual from 'lodash/isEqual';
+import {isEqual} from 'lodash';
 
 import space from 'app/styles/space';
 
@@ -17,6 +17,8 @@ import ListBody from './listBody';
 import {BreadcrumbsWithDetails} from './types';
 
 const COLUMN_QUANTITY = 5;
+const MULTIGRID_MAX_HEIGHT = 500;
+const MULTIGRID_MIN_HEIGHT = 84;
 
 type Props = {
   onSwitchTimeFormat: () => void;
@@ -31,7 +33,7 @@ type State = {
 
 const cache = new CellMeasurerCache({
   fixedWidth: true,
-  defaultHeight: 100,
+  minHeight: 42,
 });
 
 class List extends React.Component<Props, State> {
@@ -43,19 +45,23 @@ class List extends React.Component<Props, State> {
     this.loadState();
   }
 
+  componentWillReceiveProps(nextProps: Props) {
+    if (!isEqual(nextProps.breadcrumbs, this.props.breadcrumbs)) {
+      this.setState({
+        listBodyHeight: undefined,
+      });
+    }
+  }
+
   componentDidUpdate(prevProps: Props) {
     if (!isEqual(prevProps.breadcrumbs, this.props.breadcrumbs)) {
-      this.updateGrid();
+      cache.clearAll();
+      this.multiGridRef?.recomputeGridSize();
     }
   }
 
   listBodyRef = React.createRef<HTMLDivElement>();
   multiGridRef: MultiGrid | null = null;
-
-  updateGrid() {
-    cache.clearAll();
-    this.multiGridRef?.forceUpdate();
-  }
 
   loadState() {
     const listBodyElement = this.listBodyRef.current;
@@ -130,21 +136,23 @@ class List extends React.Component<Props, State> {
     );
   };
 
-  renderCell = ({key, parent, rowIndex, columnIndex, style}: GridCellProps) => (
-    <CellMeasurer
-      cache={cache}
-      columnIndex={columnIndex}
-      key={key}
-      parent={parent}
-      rowIndex={rowIndex}
-    >
-      <div style={style}>
-        {rowIndex === 0
-          ? this.renderHeader(columnIndex)
-          : this.renderBody(columnIndex, this.props.breadcrumbs[rowIndex - 1])}
-      </div>
-    </CellMeasurer>
-  );
+  renderCell = ({key, parent, rowIndex, columnIndex, style}: GridCellProps) => {
+    return (
+      <CellMeasurer
+        cache={cache}
+        columnIndex={columnIndex}
+        key={key}
+        parent={parent}
+        rowIndex={rowIndex}
+      >
+        <div style={style}>
+          {rowIndex === 0
+            ? this.renderHeader(columnIndex)
+            : this.renderBody(columnIndex, this.props.breadcrumbs[rowIndex - 1])}
+        </div>
+      </CellMeasurer>
+    );
+  };
 
   render() {
     const {breadcrumbs} = this.props;
@@ -173,7 +181,7 @@ class List extends React.Component<Props, State> {
                 this.multiGridRef = el;
               }}
               width={width}
-              height={listBodyHeight}
+              height={MULTIGRID_MAX_HEIGHT}
               // the columnsWidth is fetched in the first render
               columnWidth={({index}) => columnsWidth[index]}
               rowHeight={cache.rowHeight}
@@ -184,6 +192,7 @@ class List extends React.Component<Props, State> {
               // the fixed row is the header
               fixedRowCount={1}
               cellRenderer={this.renderCell}
+              isScrolling={false}
             />
           )}
         </AutoSizer>
@@ -195,7 +204,7 @@ class List extends React.Component<Props, State> {
 export default List;
 
 const Wrapper = styled('div')`
-  max-height: 500px;
+  max-height: ${MULTIGRID_MAX_HEIGHT}px;
   overflow-y: auto;
   display: grid;
   > *:nth-last-child(5):before {
@@ -205,5 +214,6 @@ const Wrapper = styled('div')`
   @media (min-width: ${p => p.theme.breakpoints[0]}) {
     grid-template-columns: max-content minmax(132px, 1fr) 6fr max-content max-content;
   }
+
   ${aroundContentStyle}
 `;
