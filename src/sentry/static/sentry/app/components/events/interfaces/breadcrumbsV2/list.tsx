@@ -16,8 +16,7 @@ import ListHeader from './listHeader';
 import ListBody from './listBody';
 import {BreadcrumbsWithDetails} from './types';
 
-const COLUMN_QUANTITY = 5;
-const MULTIGRID_MAX_HEIGHT = 500;
+const LIST_MAX_HEIGHT = 500;
 
 type Props = {
   onSwitchTimeFormat: () => void;
@@ -104,7 +103,7 @@ class ListContainer extends React.Component<Props, State> {
     });
   }
 
-  renderBody = (columnIndex: number, breadcrumb: BreadcrumbsWithDetails[0]) => {
+  renderBody = (breadcrumb: BreadcrumbsWithDetails[0]) => {
     const {
       event,
       orgId,
@@ -115,11 +114,9 @@ class ListContainer extends React.Component<Props, State> {
     } = this.props;
     return (
       <ListBody
-        key={`body-column-${breadcrumb.id}-${columnIndex}`}
         orgId={orgId}
         searchTerm={searchTerm}
         breadcrumb={breadcrumb}
-        column={columnIndex}
         event={event}
         relativeTime={relativeTime}
         displayRelativeTime={displayRelativeTime}
@@ -145,13 +142,21 @@ class ListContainer extends React.Component<Props, State> {
             gridTemplateColumns: `${columnsWidth[0]}px ${columnsWidth[1]}px ${columnsWidth[2]}px ${columnsWidth[3]}px ${columnsWidth[4]}px`,
           }}
         >
-          {[...Array(COLUMN_QUANTITY).keys()].map(column =>
-            this.renderBody(column, this.props.breadcrumbs[index])
-          )}
+          {this.renderBody(this.props.breadcrumbs[index])}
         </div>
       </CellMeasurer>
     );
   };
+
+  getListHeight() {
+    const {listBodyHeight} = this.state;
+
+    if (!listBodyHeight || listBodyHeight > LIST_MAX_HEIGHT) {
+      return LIST_MAX_HEIGHT;
+    }
+
+    return listBodyHeight;
+  }
 
   render() {
     const {breadcrumbs, displayRelativeTime, onSwitchTimeFormat} = this.props;
@@ -166,9 +171,7 @@ class ListContainer extends React.Component<Props, State> {
           />
           {breadcrumbs.map(breadcrumb => (
             <React.Fragment key={breadcrumb.id}>
-              {[...Array(COLUMN_QUANTITY).keys()].map(column =>
-                this.renderBody(column, breadcrumb)
-              )}
+              {this.renderBody(breadcrumb)}
             </React.Fragment>
           ))}
         </Wrapper>
@@ -188,7 +191,7 @@ class ListContainer extends React.Component<Props, State> {
                 this.listRef = el;
               }}
               deferredMeasurementCache={cache}
-              height={listBodyHeight}
+              height={this.getListHeight()}
               overscanRowCount={3}
               rowCount={breadcrumbs.length}
               rowHeight={cache.rowHeight}
@@ -205,7 +208,7 @@ class ListContainer extends React.Component<Props, State> {
 export default ListContainer;
 
 const Wrapper = styled('div')`
-  max-height: ${MULTIGRID_MAX_HEIGHT}px;
+  max-height: ${LIST_MAX_HEIGHT}px;
   overflow-y: auto;
   display: grid;
   > *:nth-last-child(5):before {
